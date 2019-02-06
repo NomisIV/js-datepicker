@@ -2,11 +2,29 @@
     width: 300px;
     height: 300px;
     margin: calc(50vh - 150px) calc(50vw - 150px);
+    border: 2px solid blue;
     border-radius: 8px;
-    box-shadow: 0 0 8px 0 black
+    /* box-shadow: 0 0 8px 0 black; */
 }
 
-tr:hover {
+#datepicker table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+#datepicker td, #datepicker th {
+    width: calc(300px / 7 - 2px);
+    height: calc(300px / 8 - 2px);
+    text-align: center;
+}
+
+#datepicker .disabled {
+    color: #777777;
+}
+
+#datepicker td:not(.disabled):hover {
+    border-radius: 4px;
+    color: white;
     background-color: blue;
     cursor: pointer;
 }
