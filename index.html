@@ -8,13 +8,24 @@
         
         <!-- Style.css -->
         <link rel="stylesheet" href="style.css">
-    </head>
-    <body onload="load()">
-        <div id="datepicker">
-            <table></table>
-        </div>
         
-        <!-- Script.js -->
-        <script src="script.js"></script>
+        <!-- Datepicker.css -->
+        <link rel="stylesheet" href="datepicker.css">
+        
+        <!-- Datepicker.js -->
+        <script src="datepicker.js"></script>
+    </head>
+    <body>
+        <input type="text" id="datepicker" autocomplete="off"></input>
+        
+        <!-- Datepicker initialization -->
+        <script>
+            const d = new Datepicker(document.getElementById("datepicker")).config({
+                firstdate: new Date(2019, 0, 9),
+                lastdate: new Date(2019, 5, 14),
+                disableddays: d => {return(d.getDay() < 5)},
+                format: d => {return(months_short[d.getMonth()] + " " + d.getDate())}
+            });
+        </script>
     </body>
 </html>
