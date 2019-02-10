@@ -56,6 +56,7 @@ class Datepicker {
         this.date = d;
         this.host.value = this.format(d);
         document.body.removeChild(document.getElementById("datepicker-frame"));
+        this.host.onchange();
     }
     
     load(d) {
