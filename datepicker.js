@@ -30,7 +30,7 @@ class Datepicker {
         this.host = host;
         
         document.addEventListener("click", e => {
-            if (e.target == document.getElementById("datepicker") && document.lastChild != document.getElementById("datepicker-frame")) this.load(new Date());
+            if (e.target == document.getElementById("datepicker") && document.body.lastChild != document.getElementById("datepicker-frame")) this.load(new Date());
         });
         window.onresize = () => { if (this.display_state) this.show(true); };
     }
