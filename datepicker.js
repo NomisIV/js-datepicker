@@ -161,5 +161,10 @@ class Datepicker {
     
     getDate() {
         return this.date;
-    } 
+    }
+    
+    setDate(date) {
+        this.date = date;
+        this.host.value = this.format(date);
+    }
 }

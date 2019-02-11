@@ -20,12 +20,14 @@
         
         <!-- Datepicker initialization -->
         <script>
-            const d = new Datepicker(document.getElementById("datepicker")).config({
+            const d = new Datepicker(document.getElementById("datepicker"))
+            d.config({
                 firstdate: new Date(2019, 0, 9),
                 lastdate: new Date(2019, 5, 14),
                 disableddays: d => {return(d.getDay() < 5)},
                 format: d => {return(months_short[d.getMonth()] + " " + d.getDate())}
             });
+            d.setDate(new Date());
         </script>
     </body>
 </html>
