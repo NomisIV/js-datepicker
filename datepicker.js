@@ -152,7 +152,7 @@ class Datepicker {
             const x = (this.host.getBoundingClientRect().left + this.host.getBoundingClientRect().right) / 2;
             const y = this.host.getBoundingClientRect().bottom - this.host.getBoundingClientRect().top + document.documentElement.scrollTop;
             this.frame.style.display = "block";
-            this.frame.style.setProperty("top", y + "px");
+            this.frame.style.setProperty("top", y + 20 + "px");
             this.frame.style.setProperty("left", x - 150 + "px");
         } else if (!bool) {
             this.frame.style.display = "none";
