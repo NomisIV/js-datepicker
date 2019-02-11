@@ -74,7 +74,7 @@ class Datepicker {
         const x = (this.host.getBoundingClientRect().left + this.host.getBoundingClientRect().right) / 2;
         const y = this.host.getBoundingClientRect().bottom - this.host.getBoundingClientRect().top + document.documentElement.scrollTop;
         this.datepicker.style.display = "block";
-        this.datepicker.style.setProperty("top", y + "px");
+        this.datepicker.style.setProperty("top", y + 20 + "px");
         this.datepicker.style.setProperty("left", x - 152 + "px");
         
         this.table = document.getElementById("datepicker-frame").children[0] || document.createElement("table");
