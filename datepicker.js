@@ -166,5 +166,6 @@ class Datepicker {
     setDate(date) {
         this.date = date;
         this.host.value = this.format(date);
+        this.host.onchange();
     }
 }
