@@ -27,136 +27,162 @@ HTMLElement.prototype.clear = function () {
 // DATEPICKER
 class Datepicker {
     constructor(host) {
-        this.host = host;
+        const t = this;
+        t.host = host;
         
+        window.onresize = () => { if (t.display_state) show(true); };
         document.addEventListener("click", e => {
-            if (e.target == document.getElementById("datepicker") && document.body.lastChild != document.getElementById("datepicker-frame")) this.load(new Date());
+            if (
+                e.target == document.getElementById("datepicker") &&
+                !document.getElementById("datepicker-frame")
+            ) load();
+            else if (
+                document.getElementById("datepicker-frame") != null &&
+                !e.path.includes(document.getElementById("datepicker-frame"))
+            ) show(false);
         });
-        window.onresize = () => { if (this.display_state) this.show(true); };
+        
+        const load = function () {
+            if (document.getElementById("datepicker-frame")) t.frame = document.getElementById("datepicker-frame");
+            else {
+                t.frame = document.createElement("div");
+                document.body.append(t.frame);
+            }
+            t.frame.id = "datepicker-frame";
+
+            t.table = document.getElementById("datepicker-frame").children[0] || document.createElement("table");
+            t.frame.append(t.table);
+            t.table.className = "noselect";
+
+            // Header
+            const row1 = document.createElement("tr");
+            t.table.append(row1);
+
+            const prev = document.createElement("th");
+            row1.append(prev);
+            prev.innerHTML = "<<";
+            if (t.firstdate == undefined || (
+                t.date.getMonth() > t.firstdate.getMonth() ||
+                t.date.getFullYear() > t.firstdate.getFullYear())
+            ) {
+                prev.className = "pointer";
+                prev.onclick = () => { month(-1); };
+            } else prev.className = "disabled";
+
+            const head = document.createElement("th");
+            row1.append(head);
+            head.colSpan = 5;
+            head.innerHTML = months[t.date.getMonth()] + " " + t.date.getFullYear();
+
+            const next = document.createElement("th");
+            row1.append(next);
+            next.innerHTML = ">>";
+            if (t.lastdate == undefined || (
+                t.date.getMonth() < t.lastdate.getMonth() ||
+                t.date.getFullYear() < t.lastdate.getFullYear())
+            ) {
+                next.className = "pointer";
+                next.onclick = () => { month(1); };
+            } else next.className = "disabled";
+
+            const row2 = document.createElement("tr");
+            t.table.append(row2);
+            for (let day = 0; day < 7; day++) {
+                const cell = document.createElement("th");
+                cell.innerHTML = weekdays_short[day];
+                row2.append(cell);
+            }
+
+            // Dates
+            const first_day_in_month = new Date(t.date.getFullYear(), t.date.getMonth(), 1);
+            let index = 1 - (first_day_in_month.getDay() || 7);
+            for (let row = 0; row < 6; row++) {
+                const tr = document.createElement("tr");
+                t.table.append(tr);
+                for (let cell = 0; cell < 7; cell++) {
+                    const day = new Date(first_day_in_month.getTime() + DAY * index);
+                    
+                    const td = document.createElement("td");
+                    tr.append(td);
+                    td.innerHTML = day.getDate();
+
+                    let class_name = day.getMonth() == t.date.getMonth() && t.disableddays(day) && (
+                        t.firstdate == undefined ? true : (
+                            day.getMonth() == t.firstdate.getMonth() ? (
+                                day.getFullYear() == t.firstdate.getFullYear() ?
+                                    day.getDate() >= t.firstdate.getDate() : true
+                            ) : true
+                        )
+                    ) && (
+                        t.lastdate == undefined ? true : (
+                            day.getMonth() == t.lastdate.getMonth() ? (
+                                day.getFullYear() == t.lastdate.getFullYear() ?
+                                    day.getDate() <= t.lastdate.getDate() : true
+                            ) : true
+                        )
+                    ) ? "pointer" : "disabled";
+                    
+                    class_name += day.toDateString() == new Date().toDateString() ? " today" : "";
+
+                    td.className = class_name;
+                    td.onclick = class_name == "pointer" ? (() => { selectDate(day); }) : undefined;
+                    index++;
+                }
+            }
+            show(true);
+        };
+        
+        const show = function (bool) {
+            if (bool) {
+                const rect = t.host.getBoundingClientRect();
+                const x = (rect.left + rect.right) / 2;
+                const y = rect.bottom - rect.top + document.documentElement.scrollTop;
+                t.frame.style.setProperty("top", y + 20 + "px");
+                t.frame.style.setProperty("left", x - 152 + "px");
+                
+                document.body.append(t.frame);
+            }
+            else if (!bool) document.getElementById("datepicker-frame").remove();
+        };
+        
+        const month = function (rel_index) {
+            t.frame.clear();
+            t.date = new Date(t.date.getFullYear(), t.date.getMonth() + rel_index, 1);
+            load();
+        };
+
+        const selectDate = function (d) {
+            t.date = d;
+            t.host.value = t.format(d);
+            if (t.host.onchange != undefined) t.host.onchange();
+            show(false);
+        };
     }
     
     config(s) {
         this.firstdate = s.firstdate || this.firstdate;
         this.lastdate = s.lastdate || this.lastdate;
-        this.disableddays = s.disableddays || this.disableddays;
-        this.format = s.format || this.format;
+        this.disableddays = s.disableddays || this.disableddays || (() => { return true;});
+        this.format = s.format || this.format || ((d) => { return d;});
         
-        if (typeof this.firstdate != "object") console.error("firstdate is not of type Object");
-        else if (typeof this.lastdate != "object") console.error("lastdate is not of type Object");
+        if (typeof this.firstdate != "object" && this.firstdate != undefined) console.error("firstdate is not of type Object");
+        else if (typeof this.lastdate != "object" && this.lastdate != undefined) console.error("lastdate is not of type Object");
         else if (typeof this.disableddays != "function") console.error("disableddays is not of type function");
         else if (typeof this.format != "function") console.error("format is not of type function");
-    }
-    
-    month(rel_index) {
-        this.frame.clear();
-        this.load(new Date(this.date.getFullYear(), this.date.getMonth() + rel_index, 1));
-    }
-    
-    selectDate(d) {
-        this.date = d;
-        this.host.value = this.format(d);
-        document.body.removeChild(document.getElementById("datepicker-frame"));
-        this.host.onchange();
-    }
-    
-    load(d) {
-        this.date = d.getTime() <= this.lastdate.getTime() ? d : this.firstdate;
         
-        if (document.getElementById("datepicker-frame")) this.frame = document.getElementById("datepicker-frame");
-        else {
-            this.frame = document.createElement("div");
-            document.body.append(this.frame);
-        }
-        this.frame.id = "datepicker-frame";
+        const d = new Date();
+        console.log(d.getTime() <= this.lastdate.getTime());
+        this.date = (
+            this.firstdate && this.lastdate ? (
+                d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
+            ) : this.firstdate ? (
+                d.getTime() >= this.firstdate.getTime() ? d : this.firstdate
+            ) : this.lastdate ? (
+                d.getTime() <= this.lastdate.getTime() ? d : this.lastdate
+            ) : d
+        );
         
-        this.datepicker = document.getElementById("datepicker-frame");        
-        
-        const x = (this.host.getBoundingClientRect().left + this.host.getBoundingClientRect().right) / 2;
-        const y = this.host.getBoundingClientRect().bottom - this.host.getBoundingClientRect().top + document.documentElement.scrollTop;
-        this.datepicker.style.display = "block";
-        this.datepicker.style.setProperty("top", y + 20 + "px");
-        this.datepicker.style.setProperty("left", x - 152 + "px");
-        
-        this.table = document.getElementById("datepicker-frame").children[0] || document.createElement("table");
-        this.frame.append(this.table);
-            
-        // Header
-        const row1 = document.createElement("tr");
-        this.table.append(row1);
-        
-        const prev = document.createElement("th");
-        row1.append(prev);
-        prev.innerHTML = "<<";
-        if (this.date.getMonth() > this.firstdate.getMonth()) {
-            prev.className = "pointer";
-            prev.onclick = () => { this.month(-1); };
-        } else prev.className = "disabled";
-        
-        const head = document.createElement("th");
-        row1.append(head);
-        head.colSpan = 5;
-        head.innerHTML = months[this.date.getMonth()] + " " + this.date.getFullYear();
-        
-        const next = document.createElement("th");
-        row1.append(next);
-        next.innerHTML = ">>";
-        if (this.date.getMonth() < this.lastdate.getMonth()) {
-            next.className = "pointer";
-            next.onclick = () => { this.month(1); };
-        } else next.className = "disabled";
-        
-        const row2 = document.createElement("tr");
-        this.table.append(row2);
-        for (let day = 0; day < 7; day++) {
-            const cell = document.createElement("th");
-            cell.innerHTML = weekdays_short[day];
-            row2.append(cell);
-        }
-        
-        // Dates
-        const first_day_in_month = new Date(this.date.getFullYear(), this.date.getMonth(), 1);
-        let index = 0;
-        for (let row = 0; row < 6; row++) {
-            const tr = document.createElement("tr");
-            this.table.append(tr);
-            for (let cell = 0; cell < 7; cell++) {
-                const day = new Date(first_day_in_month.getTime() + DAY * (index - (first_day_in_month.getDay() || 7 - 1)));
-                
-                const td = document.createElement("td");
-                tr.append(td);
-                td.innerHTML = day.getDate();
-                
-                const class_enabled = day.getMonth() == this.date.getMonth() && (
-                    day.getMonth() == this.firstdate.getMonth() ? day.getDate() > this.firstdate.getDate() :
-                        day.getMonth() == this.lastdate.getMonth() ? day.getDate() < this.lastdate.getDate() :
-                            this.firstdate.getMonth() <= day.getMonth() <= this.lastdate.getMonth()
-                ) && this.disableddays(day) ? "pointer" : "disabled";
-                        
-                const d = new Date();
-                const class_today = (
-                    day.getFullYear() == d.getFullYear() &&
-                    day.getMonth() == d.getMonth() &&
-                    day.getDate() == d.getDate()
-                ) ? " today" : "";
-                
-                td.className = class_enabled + class_today;
-                td.onclick = () => { this.selectDate(day); };
-                index++;
-            }
-        }
-    }
-    
-    show(bool) {
-        this.display_state = bool;
-        if (bool) {
-            const x = (this.host.getBoundingClientRect().left + this.host.getBoundingClientRect().right) / 2;
-            const y = this.host.getBoundingClientRect().bottom - this.host.getBoundingClientRect().top + document.documentElement.scrollTop;
-            this.frame.style.display = "block";
-            this.frame.style.setProperty("top", y + 20 + "px");
-            this.frame.style.setProperty("left", x - 150 + "px");
-        } else if (!bool) {
-            this.frame.style.display = "none";
-        }
+        this.host.value = this.format(this.date);
     }
     
     getDate() {
@@ -164,8 +190,9 @@ class Datepicker {
     }
     
     setDate(date) {
+        if (!this.disableddays(date)) return ("ERR_DISABLED");
         this.date = date;
         this.host.value = this.format(date);
-        this.host.onchange();
+        if(typeof this.host.onchange() == "function") this.host.onchange();
     }
 }

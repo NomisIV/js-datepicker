@@ -16,18 +16,17 @@
         <script src="datepicker.js"></script>
     </head>
     <body>
-        <input type="text" id="datepicker" autocomplete="off" onchange="console.log('Hello World!')"></input>
+        <input type="text" id="datepicker" autocomplete="off"></input>
         
         <!-- Datepicker initialization -->
         <script>
-            const d = new Datepicker(document.getElementById("datepicker"))
-            d.config({
+            const d = new Datepicker(document.getElementById("datepicker")).config({
                 firstdate: new Date(2019, 0, 9),
-                lastdate: new Date(2019, 5, 14),
-                disableddays: d => {return(d.getDay() < 5)},
+                lastdate: new Date(2019, 5, 13),
+                disableddays: d => {return(d.getDay() > 0 && d.getDay() < 6)},
                 format: d => {return(months_short[d.getMonth()] + " " + d.getDate())}
             });
-            d.setDate(new Date());
+            // d.setDate(new Date(2018, 6, 4))
         </script>
     </body>
 </html>
