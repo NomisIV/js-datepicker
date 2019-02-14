@@ -171,7 +171,6 @@ class Datepicker {
         else if (typeof this.format != "function") console.error("format is not of type function");
         
         const d = new Date();
-        console.log(d.getTime() <= this.lastdate.getTime());
         this.date = (
             this.firstdate && this.lastdate ? (
                 d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
