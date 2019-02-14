@@ -16,11 +16,12 @@
         <script src="datepicker.js"></script>
     </head>
     <body>
-        <input type="text" id="datepicker" autocomplete="off"></input>
+        <input type="text" id="datepicker" onchange="console.log(d.getDate())" autocomplete="off"></input>
         
         <!-- Datepicker initialization -->
         <script>
-            const d = new Datepicker(document.getElementById("datepicker")).config({
+            const d = new Datepicker(document.getElementById("datepicker"));
+            d.config({
                 firstdate: new Date(2019, 0, 9),
                 lastdate: new Date(2019, 5, 13),
                 disableddays: d => {return(d.getDay() > 0 && d.getDay() < 6)},

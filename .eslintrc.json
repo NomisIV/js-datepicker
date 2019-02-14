@@ -33,17 +33,6 @@
             {
                 "vars": "local"
             }
-        ],
-        "no-useless-escape": [
-            "off"
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
         ]
     }
 }

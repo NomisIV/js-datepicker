@@ -35,23 +35,28 @@ class Datepicker {
             if (
                 e.target == document.getElementById("datepicker") &&
                 !document.getElementById("datepicker-frame")
-            ) load();
+            ) {
+                this.load();
+                show(true);
+            }
             else if (
                 document.getElementById("datepicker-frame") != null &&
                 !e.path.includes(document.getElementById("datepicker-frame"))
             ) show(false);
         });
         
-        const load = function () {
+        this.load = function () {
             if (document.getElementById("datepicker-frame")) t.frame = document.getElementById("datepicker-frame");
             else {
                 t.frame = document.createElement("div");
-                document.body.append(t.frame);
             }
+            t.frame = document.getElementById("datepicker-frame") ?
+                document.getElementById("datepicker-frame") : document.createElement("div");
             t.frame.id = "datepicker-frame";
 
-            t.table = document.getElementById("datepicker-frame").children[0] || document.createElement("table");
+            t.table = document.createElement("table");
             t.frame.append(t.table);
+            
             t.table.className = "noselect";
 
             // Header
@@ -129,7 +134,6 @@ class Datepicker {
                     index++;
                 }
             }
-            show(true);
         };
         
         const show = function (bool) {
@@ -148,7 +152,7 @@ class Datepicker {
         const month = function (rel_index) {
             t.frame.clear();
             t.date = new Date(t.date.getFullYear(), t.date.getMonth() + rel_index, 1);
-            load();
+            t.load();
         };
 
         const selectDate = function (d) {
@@ -192,6 +196,7 @@ class Datepicker {
         if (!this.disableddays(date)) return ("ERR_DISABLED");
         this.date = date;
         this.host.value = this.format(date);
-        if(typeof this.host.onchange() == "function") this.host.onchange();
+        this.load();
+        if(typeof this.host.onchange == "function") this.host.onchange();
     }
 }
