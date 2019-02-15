@@ -130,7 +130,7 @@ class Datepicker {
                     class_name += day.toDateString() == new Date().toDateString() ? " today" : "";
 
                     td.className = class_name;
-                    td.onclick = class_name == "pointer" ? (() => { selectDate(day); }) : undefined;
+                    td.onclick = class_name != "disabled" ? (() => { selectDate(day); }) : undefined;
                     index++;
                 }
             }
