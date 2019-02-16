@@ -166,24 +166,29 @@ class Datepicker {
     config(s) {
         this.firstdate = s.firstdate || this.firstdate;
         this.lastdate = s.lastdate || this.lastdate;
-        this.disableddays = s.disableddays || this.disableddays || (() => { return true;});
-        this.format = s.format || this.format || ((d) => { return d;});
-        
+        this.disableddays = s.disableddays || this.disableddays || (() => { return true; });
+        this.format = s.format || this.format || ((d) => { return d; });
+
         if (typeof this.firstdate != "object" && this.firstdate != undefined) console.error("firstdate is not of type Object");
         else if (typeof this.lastdate != "object" && this.lastdate != undefined) console.error("lastdate is not of type Object");
         else if (typeof this.disableddays != "function") console.error("disableddays is not of type function");
         else if (typeof this.format != "function") console.error("format is not of type function");
-        
+
         const d = new Date();
-        this.date = this.date || (
-            this.firstdate && this.lastdate ? (
-                d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
-            ) : this.firstdate ? (
-                d.getTime() >= this.firstdate.getTime() ? d : this.firstdate
-            ) : this.lastdate ? (
-                d.getTime() <= this.lastdate.getTime() ? d : this.lastdate
-            ) : d
-        );
+        let date = d;
+        while (!this.disableddays(date)) {
+            date = (
+                this.firstdate && this.lastdate ? (
+                    d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
+                ) : this.firstdate ? (
+                    d.getTime() >= this.firstdate.getTime() ? d : this.firstdate
+                ) : this.lastdate ? (
+                    d.getTime() <= this.lastdate.getTime() ? d : this.lastdate
+                ) : d
+            );
+            d.setTime(d.getTime() + DAY);
+        }
+        this.date = this.date || date;
         this.host.value = this.format(this.date);
     }
     
