@@ -42,8 +42,8 @@ An example of a valid configuration:
 d.config({
     firstdate: new Date(2019, 0, 1), // First of January 2019
     lastdate: new Date(2019, 11, 31), // Last December 2019
-    disableddays: d => { return (d.getDay() > 0 && d.getDay() < 6); }, //Returns true if the date is between Sunday and Saturday (Weekdays)
-    format: d => { return (months_short[d.getMonth()] + " " + d.getDate()); }
+    disableddays: d => { return (d.getDay() > 0 && d.getDay() < 6); }, // Returns true if the date is between Sunday and Saturday (Weekdays)
+    format: d => { return (months_short[d.getMonth()] + " " + d.getDate()); } // Returns MMM d
 });
 ~~~~
 
