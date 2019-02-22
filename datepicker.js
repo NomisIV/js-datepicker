@@ -197,7 +197,13 @@ class Datepicker {
     }
     
     setDate(date) {
-        if (!this.disableddays(date)) return ("ERR_DISABLED");
+        if (date < this.firstdate || date > this.lastdate) return;
+        console.log(!this.disableddays(date));
+        if (!this.disableddays(date)) {
+            date = new Date(date.getTime() + DAY);
+            this.setDate(date);
+            return;
+        }
         this.date = date;
         this.host.value = this.format(date);
         this.load();
