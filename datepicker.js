@@ -198,7 +198,6 @@ class Datepicker {
     
     setDate(date) {
         if (date < this.firstdate || date > this.lastdate) return;
-        console.log(!this.disableddays(date));
         if (!this.disableddays(date)) {
             date = new Date(date.getTime() + DAY);
             this.setDate(date);
