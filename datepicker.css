@@ -15,6 +15,7 @@
     background-color: white;
     box-shadow: 0 0 8px 0 black;
     color: #333333;
+    font: 16px Tahoma;
 }
 
 #datepicker-frame table {
@@ -30,6 +31,14 @@
     text-align: center;
 }
 
+#datepicker-frame :first-child :first-child {
+    border-top-left-radius: 8px;
+}
+
+#datepicker-frame :first-child :last-child {
+    border-top-right-radius: 8px;
+}
+
 #datepicker-frame .disabled {
     color: #a0a0a0;
 }
@@ -39,7 +48,7 @@
     color: white;
 }
 
-#datepicker-frame td:not(.disabled):not(.today):hover {
+#datepicker-frame .pointer:not(.today):hover {
     background-color: #d0d0d0;
 }
 
