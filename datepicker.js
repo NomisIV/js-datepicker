@@ -20,23 +20,29 @@ Date.prototype.getWeekNumber = function () {
     return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 };
 
-HTMLElement.prototype.clear = function () {
-    while (this.firstChild) this.removeChild(this.firstChild);
-};
-
 // DATEPICKER
 class Datepicker {
-    constructor(host) {
+    constructor(host, s) {
         const t = this;
         t.host = host;
+        t.frame = document.createElement("div");
+        t.frame.id = "datepicker-frame";
+        t.frame.className = "noselect";
         
-        window.onresize = () => { if (t.display_state) show(true); };
+        t.table = document.createElement("table");
+        t.frame.append(t.table);
+        
+        // Run config if settings present
+        if (s) t.config(s); 
+        
+        // Show conditions
+        window.onresize = () => { if (t.display_state) show(true); }; // to update screen position
         document.addEventListener("click", e => {
             if (
                 e.target == document.getElementById("datepicker") &&
                 !document.getElementById("datepicker-frame")
             ) {
-                this.load();
+                t.load("day"); // Start date when opening
                 show(true);
             }
             else if (
@@ -45,93 +51,169 @@ class Datepicker {
             ) show(false);
         });
         
-        this.load = function () {
-            if (document.getElementById("datepicker-frame")) t.frame = document.getElementById("datepicker-frame");
-            else {
-                t.frame = document.createElement("div");
+        // Load
+        t.load = function (n) {
+            while (t.table.firstChild) t.table.removeChild(t.table.firstChild);
+            t.table.className = n;
+            // If data is month
+            if (n == "day") {
+                // Row 1 [Prev, Month and year, Next]
+                const row1 = document.createElement("tr");
+                t.table.append(row1);
+                
+                // Prev
+                const prev = document.createElement("th");
+                row1.append(prev);
+                prev.innerHTML = "<<";
+                if (t.firstdate == undefined || (
+                    t.date.getMonth() > t.firstdate.getMonth() ||
+                    t.date.getFullYear() > t.firstdate.getFullYear())
+                ) {
+                    prev.className = "pointer";
+                    prev.onclick = () => {
+                        t.date = new Date(t.date.getFullYear(), t.date.getMonth() - 1, 1);
+                        t.load("day");
+                    };
+                } else prev.className = "disabled";
+    
+                // month and year
+                const head = document.createElement("th");
+                row1.append(head);
+                head.colSpan = 5;
+                head.innerHTML = months[t.date.getMonth()] + " " + t.date.getFullYear();
+                head.onclick = () => {
+                    t.load("month");
+                };
+                head.className = "pointer";
+    
+                // Next
+                const next = document.createElement("th");
+                row1.append(next);
+                next.innerHTML = ">>";
+                if (t.lastdate == undefined || (
+                    t.date.getMonth() < t.lastdate.getMonth() ||
+                    t.date.getFullYear() < t.lastdate.getFullYear())
+                ) {
+                    next.className = "pointer";
+                    next.onclick = () => {
+                        t.date = new Date(t.date.getFullYear(), t.date.getMonth() + 1, 1);
+                        t.load("day");
+                    };
+                } else next.className = "disabled";
+    
+                // Row 2 [Weekdays]
+                const row2 = document.createElement("tr");
+                t.table.append(row2);
+                for (let day = 0; day < 7; day++) {
+                    const cell = document.createElement("th");
+                    cell.innerHTML = weekdays_short[day];
+                    row2.append(cell);
+                }
+    
+                // Dates
+                const first_day_in_month = new Date(t.date.getFullYear(), t.date.getMonth(), 1);
+                let index = 1 - (first_day_in_month.getDay() || 7);
+                for (let y = 0; y < 6; y++) {
+                    const tr = document.createElement("tr");
+                    t.table.append(tr);
+                    for (let x = 0; x < 7; x++) {
+                        const day = new Date(first_day_in_month.getTime() + DAY * index);
+                        
+                        const td = document.createElement("td");
+                        tr.append(td);
+                        td.innerHTML = day.getDate();
+                        
+                        if (day.getMonth() == t.date.getMonth() && t.disableddays(day) && (
+                            t.firstdate == undefined ? true : (
+                                day.getMonth() == t.firstdate.getMonth() ? (
+                                    day.getFullYear() == t.firstdate.getFullYear() ?
+                                        day.getDate() >= t.firstdate.getDate() : true
+                                ) : true
+                            )
+                        ) && (
+                            t.lastdate == undefined ? true : (
+                                day.getMonth() == t.lastdate.getMonth() ? (
+                                    day.getFullYear() == t.lastdate.getFullYear() ?
+                                        day.getDate() <= t.lastdate.getDate() : true
+                                ) : true
+                            )
+                        )) {
+                            td.className = "pointer";
+                            td.onclick = () => {
+                                t.setDate(day);
+                                show(false);
+                            };
+                        } else td.className = "disabled";
+                        td.className += day.toDateString() == new Date().toDateString() ? " today" : "";
+    
+                        index++;
+                    }
+                }
             }
-            t.frame = document.getElementById("datepicker-frame") ?
-                document.getElementById("datepicker-frame") : document.createElement("div");
-            t.frame.id = "datepicker-frame";
-
-            t.table = document.createElement("table");
-            t.frame.append(t.table);
             
-            t.table.className = "noselect";
-
-            // Header
-            const row1 = document.createElement("tr");
-            t.table.append(row1);
-
-            const prev = document.createElement("th");
-            row1.append(prev);
-            prev.innerHTML = "<<";
-            if (t.firstdate == undefined || (
-                t.date.getMonth() > t.firstdate.getMonth() ||
-                t.date.getFullYear() > t.firstdate.getFullYear())
-            ) {
-                prev.className = "pointer";
-                prev.onclick = () => { month(-1); };
-            } else prev.className = "disabled";
-
-            const head = document.createElement("th");
-            row1.append(head);
-            head.colSpan = 5;
-            head.innerHTML = months[t.date.getMonth()] + " " + t.date.getFullYear();
-
-            const next = document.createElement("th");
-            row1.append(next);
-            next.innerHTML = ">>";
-            if (t.lastdate == undefined || (
-                t.date.getMonth() < t.lastdate.getMonth() ||
-                t.date.getFullYear() < t.lastdate.getFullYear())
-            ) {
-                next.className = "pointer";
-                next.onclick = () => { month(1); };
-            } else next.className = "disabled";
-
-            const row2 = document.createElement("tr");
-            t.table.append(row2);
-            for (let day = 0; day < 7; day++) {
-                const cell = document.createElement("th");
-                cell.innerHTML = weekdays_short[day];
-                row2.append(cell);
-            }
-
-            // Dates
-            const first_day_in_month = new Date(t.date.getFullYear(), t.date.getMonth(), 1);
-            let index = 1 - (first_day_in_month.getDay() || 7);
-            for (let row = 0; row < 6; row++) {
-                const tr = document.createElement("tr");
-                t.table.append(tr);
-                for (let cell = 0; cell < 7; cell++) {
-                    const day = new Date(first_day_in_month.getTime() + DAY * index);
-                    
-                    const td = document.createElement("td");
-                    tr.append(td);
-                    td.innerHTML = day.getDate();
-
-                    let class_name = day.getMonth() == t.date.getMonth() && t.disableddays(day) && (
-                        t.firstdate == undefined ? true : (
-                            day.getMonth() == t.firstdate.getMonth() ? (
-                                day.getFullYear() == t.firstdate.getFullYear() ?
-                                    day.getDate() >= t.firstdate.getDate() : true
-                            ) : true
-                        )
-                    ) && (
-                        t.lastdate == undefined ? true : (
-                            day.getMonth() == t.lastdate.getMonth() ? (
-                                day.getFullYear() == t.lastdate.getFullYear() ?
-                                    day.getDate() <= t.lastdate.getDate() : true
-                            ) : true
-                        )
-                    ) ? "pointer" : "disabled";
-                    
-                    class_name += day.toDateString() == new Date().toDateString() ? " today" : "";
-
-                    td.className = class_name;
-                    td.onclick = class_name != "disabled" ? (() => { selectDate(day); }) : undefined;
-                    index++;
+            // If data is year
+            else if (n == "month") {
+                // Row 1 [Prev, Year, Next]
+                const row = document.createElement("tr");
+                t.table.append(row);
+                
+                // Prev
+                const prev = document.createElement("th");
+                row.append(prev);
+                prev.innerHTML = "<<";
+                if (t.firstdate == undefined || (
+                    t.date.getFullYear() > t.firstdate.getFullYear())
+                ) {
+                    prev.className = "pointer";
+                    prev.onclick = () => {
+                        t.date = new Date(t.date.getFullYear() - 1, 1, 1);
+                        t.load("month");
+                    };
+                } else prev.className = "disabled";
+        
+                // Year
+                const head = document.createElement("th");
+                row.append(head);
+                head.colSpan = 2;
+                head.innerHTML = t.date.getFullYear();
+        
+                // Next
+                const next = document.createElement("th");
+                row.append(next);
+                next.innerHTML = ">>";
+                if (t.lastdate == undefined || (
+                    t.date.getFullYear() < t.lastdate.getFullYear())
+                ) {
+                    next.className = "pointer";
+                    next.onclick = () => {
+                        t.date = new Date(t.date.getFullYear() + 1, 1, 1);
+                        t.load("month");
+                    };
+                } else next.className = "disabled";
+                
+                // Months
+                for (let y = 0; y < 3; y++) {
+                    const row = document.createElement("tr");
+                    t.table.append(row);
+                    for (let x = 0; x < 4; x++) {
+                        const index = y * 4 + x;
+                        const day = new Date(t.date.getFullYear(), index, 1);
+                        
+                        const cell = document.createElement("td");
+                        row.append(cell);
+                        cell.innerHTML = months_short[index];
+                        
+                        if (
+                            (t.firstdate != undefined ? day.getTime() >= new Date(t.firstdate).setDate(1) : true) &&
+                            (t.lastdate != undefined ? day.getTime() <= new Date(t.lastdate).setDate(1) : true)
+                        ) {
+                            cell.className = "pointer";
+                            cell.onclick = () => {
+                                t.date = new Date(t.date.getFullYear(), index, 1);
+                                t.load("day");
+                            };
+                        } else cell.className = "disabled";
+                    }
                 }
             }
         };
@@ -147,19 +229,6 @@ class Datepicker {
                 document.body.append(t.frame);
             }
             else if (!bool) document.getElementById("datepicker-frame").remove();
-        };
-        
-        const month = function (rel_index) {
-            t.frame.clear();
-            t.date = new Date(t.date.getFullYear(), t.date.getMonth() + rel_index, 1);
-            t.load();
-        };
-
-        const selectDate = function (d) {
-            t.date = d;
-            t.host.value = t.format(d);
-            if (t.host.onchange != undefined) t.host.onchange();
-            show(false);
         };
     }
     
@@ -177,15 +246,13 @@ class Datepicker {
         const d = new Date();
         let date = d;
         while (!this.disableddays(date)) {
-            date = (
-                this.firstdate && this.lastdate ? (
-                    d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
-                ) : this.firstdate ? (
-                    d.getTime() >= this.firstdate.getTime() ? d : this.firstdate
-                ) : this.lastdate ? (
-                    d.getTime() <= this.lastdate.getTime() ? d : this.lastdate
-                ) : d
-            );
+            date = this.firstdate && this.lastdate ? (
+                d.getTime() >= this.firstdate.getTime() && d.getTime() <= this.lastdate.getTime() ? d : this.firstdate
+            ) : this.firstdate ? (
+                d.getTime() >= this.firstdate.getTime() ? d : this.firstdate
+            ) : this.lastdate ? (
+                d.getTime() <= this.lastdate.getTime() ? d : this.lastdate
+            ) : d;
             d.setTime(d.getTime() + DAY);
         }
         this.date = this.date || date;
@@ -205,7 +272,6 @@ class Datepicker {
         }
         this.date = date;
         this.host.value = this.format(date);
-        this.load();
         if(typeof this.host.onchange == "function") this.host.onchange();
     }
 }
