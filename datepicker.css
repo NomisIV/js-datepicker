@@ -18,6 +18,29 @@
     font: 16px Tahoma;
 }
 
+#datepicker-frame ul {
+    list-style: none;
+    width: 300px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+    line-height: 40px;
+}
+
+#datepicker-frame li {
+    width: 220px;
+    height: 40px;
+    float: left;
+}
+
+#datepicker-frame li:first-child,
+#datepicker-frame li:last-child {
+    width: 40px;
+    height: 40px;
+    float: left;
+}
+
 #datepicker-frame table {
     border-collapse: collapse;
     margin: auto;

@@ -29,8 +29,7 @@ class Datepicker {
         t.frame.id = "datepicker-frame";
         t.frame.className = "noselect";
         
-        t.table = document.createElement("table");
-        t.frame.append(t.table);
+        
         
         // Run config if settings present
         if (s) t.config(s); 
@@ -53,17 +52,20 @@ class Datepicker {
         
         // Load
         t.load = function (n) {
-            while (t.table.firstChild) t.table.removeChild(t.table.firstChild);
+            while (t.frame.firstChild) t.frame.removeChild(t.frame.firstChild);
+            
+            t.head = document.createElement("ul");
+            t.frame.append(t.head);
+            
+            t.table = document.createElement("table");
+            t.frame.append(t.table);            
             t.table.className = n;
+            
             // If data is month
             if (n == "day") {
-                // Row 1 [Prev, Month and year, Next]
-                const row1 = document.createElement("tr");
-                t.table.append(row1);
-                
                 // Prev
-                const prev = document.createElement("th");
-                row1.append(prev);
+                const prev = document.createElement("li");
+                t.head.append(prev);
                 prev.innerHTML = "<<";
                 if (t.firstdate == undefined || (
                     t.date.getMonth() > t.firstdate.getMonth() ||
@@ -77,8 +79,8 @@ class Datepicker {
                 } else prev.className = "disabled";
     
                 // month and year
-                const head = document.createElement("th");
-                row1.append(head);
+                const head = document.createElement("li");
+                t.head.append(head);
                 head.colSpan = 5;
                 head.innerHTML = months[t.date.getMonth()] + " " + t.date.getFullYear();
                 head.onclick = () => {
@@ -87,8 +89,8 @@ class Datepicker {
                 head.className = "pointer";
     
                 // Next
-                const next = document.createElement("th");
-                row1.append(next);
+                const next = document.createElement("li");
+                t.head.append(next);
                 next.innerHTML = ">>";
                 if (t.lastdate == undefined || (
                     t.date.getMonth() < t.lastdate.getMonth() ||
@@ -101,13 +103,13 @@ class Datepicker {
                     };
                 } else next.className = "disabled";
     
-                // Row 2 [Weekdays]
-                const row2 = document.createElement("tr");
-                t.table.append(row2);
+                // Header row [Weekdays]
+                const row = document.createElement("tr");
+                t.table.append(row);
                 for (let day = 0; day < 7; day++) {
                     const cell = document.createElement("th");
                     cell.innerHTML = weekdays_short[day];
-                    row2.append(cell);
+                    row.append(cell);
                 }
     
                 // Dates
@@ -153,13 +155,9 @@ class Datepicker {
             
             // If data is year
             else if (n == "month") {
-                // Row 1 [Prev, Year, Next]
-                const row = document.createElement("tr");
-                t.table.append(row);
-                
                 // Prev
-                const prev = document.createElement("th");
-                row.append(prev);
+                const prev = document.createElement("li");
+                t.head.append(prev);
                 prev.innerHTML = "<<";
                 if (t.firstdate == undefined || (
                     t.date.getFullYear() > t.firstdate.getFullYear())
@@ -172,14 +170,13 @@ class Datepicker {
                 } else prev.className = "disabled";
         
                 // Year
-                const head = document.createElement("th");
-                row.append(head);
-                head.colSpan = 2;
+                const head = document.createElement("li");
+                t.head.append(head);
                 head.innerHTML = t.date.getFullYear();
         
                 // Next
-                const next = document.createElement("th");
-                row.append(next);
+                const next = document.createElement("li");
+                t.head.append(next);
                 next.innerHTML = ">>";
                 if (t.lastdate == undefined || (
                     t.date.getFullYear() < t.lastdate.getFullYear())
