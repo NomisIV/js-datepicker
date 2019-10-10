@@ -1,5 +1,10 @@
 # Datepicker
 
+![GitHub top language](https://img.shields.io/github/languages/top/NomisIV/Datepicker)
+![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/NomisIV/Datepicker)
+![Code Climate issues](https://img.shields.io/codeclimate/issues/NomisIV/Datepicker)
+![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/NomisIV/Datepicker)
+
 A lightweight and pure javascript and css datepicker. The datepicker.js-file provides a Datepicker object which can be connected to a DOM element.
 
 ## Index
