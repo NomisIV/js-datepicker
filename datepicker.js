@@ -119,7 +119,8 @@ class Datepicker {
                     const tr = document.createElement("tr");
                     t.table.append(tr);
                     for (let x = 0; x < 7; x++) {
-                        const day = new Date(first_day_in_month.getTime() + DAY * index);
+                        let day = new Date(first_day_in_month.getTime());
+                        day.setDate(day.getDate() + index);
                         
                         const td = document.createElement("td");
                         tr.append(td);
