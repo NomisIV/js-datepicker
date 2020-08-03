@@ -1,0 +1,22 @@
+{
+  "name": "js-datepicker",
+  "version": "2.0.0",
+  "description": "A vanilla datepicker which doesn't require any dependecies",
+  "main": "demo.html",
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NomisIV/js-datepicker.git"
+  },
+  "author": "NomisIV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NomisIV/js-datepicker/issues"
+  },
+  "homepage": "https://github.com/NomisIV/js-datepicker#readme"
+}
