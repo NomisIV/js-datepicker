@@ -30,7 +30,7 @@
     <script>
       const d = new Datepicker(document.getElementById("date-input"), {
         last_date: new Date(2020, 06, 21),
-        disabled_days: (d) => {
+        enabled_days: (d) => {
           return d.getDay() > 0 && d.getDay() < 6;
         },
         format: (d) => {
@@ -40,7 +40,7 @@
 
       const d2 = new Datepicker(document.getElementById("date-input2"), {
         first_date: new Date(2020, 06, 19),
-        disabled_days: (d) => {
+        enabled_days: (d) => {
           return d.getDate() % 2 == 0;
         },
         format: (d) => {
